@@ -13,6 +13,21 @@ jobs:
     name: Run Tests
     runs-on: ubuntu-latest
 
+    services:
+      db:
+        image: postgres:15
+        env:
+          POSTGRES_DB: mydb
+          POSTGRES_USER: myuser
+          POSTGRES_PASSWORD: mypassword
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -27,6 +42,11 @@ jobs:
           pip install flask psycopg2-binary pytest
 
       - name: Run tests
+        env:
+          DB_HOST: localhost
+          DB_NAME: mydb
+          DB_USER: myuser
+          DB_PASSWORD: mypassword
         run: |
           cd app
           pytest test_app.py -v
